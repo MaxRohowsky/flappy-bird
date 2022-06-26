@@ -20,26 +20,37 @@ bottom_pipe_image = pygame.image.load("assets/pipe_bottom.png")
 
 
 class Bird(pygame.sprite.Sprite):
-
-    def __init__(self, x, y, image=bird_images[0]):
+    def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = image
+        self.image = bird_images[0]
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = x, y
         self.flap = False
-        self.flying = True
         self.vel = 0
+        self.image_index = 0
+        self.alive = True
 
     def update(self):
-        if self.flying:
-            self.vel += 0.5
-            if self.vel > 7:
-                self.vel = 7
-            if self.rect.y < 520:
-                self.rect.y += int(self.vel)
-            if self.vel == 0:
-                self.flap = False
+        # Animate Bird
+        if self.alive:
+            self.image_index += 1
+        if self.image_index >= 30:
+            self.image_index = 0
+        self.image = bird_images[self.image_index // 10]
 
+        # Rotate Bird
+        self.image = pygame.transform.rotate(self.image, self.vel * -7)
+
+        # Gravity and Flap
+        self.vel += 0.5
+        if self.vel > 7:
+            self.vel = 7
+        if self.rect.y < 520:
+            self.rect.y += int(self.vel)
+        if self.vel == 0:
+            self.flap = False
+
+        # User Input
         if user_input[pygame.K_SPACE] and not self.flap:
             self.flap = True
             self.vel = -7
@@ -73,7 +84,8 @@ class Ground(pygame.sprite.Sprite):
 
 
 bird = pygame.sprite.Group()
-bird.add(Bird(100, 100))
+player = Bird(100, 100)
+bird.add(player)
 pipes = pygame.sprite.Group()
 ground = pygame.sprite.Group()
 
@@ -82,31 +94,45 @@ pipe_timer = 0
 scroll_speed = 1
 ground.add(Ground(x_pos_ground, 520), Ground(win_width + x_pos_ground, 520))
 
-
 run = True
 while run:
-
+    # Quit
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+
+    # Reset Frame
     window.fill((0, 0, 0))
 
+    # User Input
+    if player.alive:
+        user_input = pygame.key.get_pressed()
+
+    # Draw Background
     window.blit(skyline_image, (0, 0))
 
-    user_input = pygame.key.get_pressed()
-
-    pipes.update()
+    # Pipes, Ground, and Bird
     pipes.draw(window)
-
-    ground.update()
     ground.draw(window)
-
-    bird.update()
     bird.draw(window)
 
+    if player.alive:
+        pipes.update()
+        ground.update()
+    bird.update()
+
+    # Collision Detection
+    collision_pipes = pygame.sprite.spritecollide(bird.sprites()[0], pipes, False)
+    collision_ground = pygame.sprite.spritecollide(bird.sprites()[0], ground, False)
+    if collision_pipes or collision_ground:
+        print('collision')
+        player.alive = False
+
+    # Spawn Ground
     if len(ground) == 1:
         ground.add(Ground(win_width, 520))
 
+    # Spawn Pipes
     if pipe_timer <= 0:
         x_top, x_bottom = 550, 550
         y_top = random.randint(-600, -480)
