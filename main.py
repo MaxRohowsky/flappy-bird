@@ -25,14 +25,15 @@ start_image = pygame.image.load("assets/start.png")
 scroll_speed = 1
 game_stopped = True
 score = 0
+bird_start_position = (100, 250)
 
 
 class Bird(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = bird_images[0]
         self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = x, y
+        self.rect.center = bird_start_position
         self.vel = 0
         self.image_index = 0
         self.flap = False
@@ -59,7 +60,7 @@ class Bird(pygame.sprite.Sprite):
             self.flap = False
 
         # User Input
-        if user_input[pygame.K_SPACE] and not self.flap and self.alive:
+        if user_input[pygame.K_SPACE] and not self.flap and self.alive and self.rect.y > 0:
             self.flap = True
             self.vel = -7
 
@@ -111,7 +112,7 @@ def main():
     x_pos_ground = 0
 
     bird = pygame.sprite.GroupSingle()
-    bird.add(Bird(100, 250))
+    bird.add(Bird())
 
     pipes = pygame.sprite.Group()
 
@@ -122,7 +123,6 @@ def main():
     while run:
         # Quit
         quit_game()
-        print(bird.sprite.alive)
 
         # Reset Frame
         window.fill((0, 0, 0))
