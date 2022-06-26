@@ -26,7 +26,7 @@ scroll_speed = 1
 game_stopped = True
 score = 0
 bird_start_position = (100, 250)
-font = pygame.font.SysFont(None, 26)
+font = pygame.font.SysFont('Segoe', 26)
 
 
 class Bird(pygame.sprite.Sprite):
@@ -36,8 +36,8 @@ class Bird(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = bird_start_position
         self.vel = 0
-        self.image_index = 0
         self.flap = False
+        self.image_index = 0
         self.alive = True
 
     def update(self, user_input):
@@ -98,8 +98,7 @@ class Ground(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = ground_image
         self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        self.rect.x, self.rect.y = x, y
 
     def update(self):
         # Move Ground
@@ -118,14 +117,16 @@ def quit_game():
 
 # Game Main Method
 def main():
-    pipe_timer = 0
-    x_pos_ground = 0
-
+    # Instantiate Bird
     bird = pygame.sprite.GroupSingle()
     bird.add(Bird())
 
+    # Instantiate Initial Pipes
+    pipe_timer = 0
     pipes = pygame.sprite.Group()
 
+    # Instantiate Initial Ground
+    x_pos_ground = 0
     ground = pygame.sprite.Group()
     ground.add(Ground(x_pos_ground, 520), Ground(win_width + x_pos_ground, 520))
 
@@ -149,8 +150,8 @@ def main():
         bird.draw(window)
 
         # Show Score
-        img = font.render('Score: ' + str(score), True, pygame.Color(255, 255, 255))
-        window.blit(img, (20, 20))
+        score_text = font.render('Score: ' + str(score), True, pygame.Color(255, 255, 255))
+        window.blit(score_text, (20, 20))
 
         # Update - Pipes, Ground, and Bird
         if bird.sprite.alive:
