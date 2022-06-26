@@ -26,7 +26,7 @@ scroll_speed = 1
 game_stopped = True
 score = 0
 bird_start_position = (100, 250)
-font = pygame.font.SysFont(None, 24)
+font = pygame.font.SysFont(None, 26)
 
 
 class Bird(pygame.sprite.Sprite):
