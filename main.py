@@ -19,6 +19,32 @@ top_pipe_image = pygame.image.load("assets/pipe_top.png")
 bottom_pipe_image = pygame.image.load("assets/pipe_bottom.png")
 
 
+class Bird(pygame.sprite.Sprite):
+
+    def __init__(self, x, y, image=bird_images[0]):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = x, y
+        self.flap = False
+        self.flying = True
+        self.vel = 0
+
+    def update(self):
+        if self.flying:
+            self.vel += 0.5
+            if self.vel > 7:
+                self.vel = 7
+            if self.rect.y < 520:
+                self.rect.y += int(self.vel)
+            if self.vel == 0:
+                self.flap = False
+
+        if user_input[pygame.K_SPACE] and not self.flap:
+            self.flap = True
+            self.vel = -7
+
+
 class Pipe(pygame.sprite.Sprite):
     def __init__(self, x, y, image):
         pygame.sprite.Sprite.__init__(self)
@@ -46,6 +72,8 @@ class Ground(pygame.sprite.Sprite):
             self.kill()
 
 
+bird = pygame.sprite.Group()
+bird.add(Bird(100, 100))
 pipes = pygame.sprite.Group()
 ground = pygame.sprite.Group()
 
@@ -65,7 +93,7 @@ while run:
 
     window.blit(skyline_image, (0, 0))
 
-    userInput = pygame.key.get_pressed()
+    user_input = pygame.key.get_pressed()
 
     pipes.update()
     pipes.draw(window)
@@ -73,16 +101,19 @@ while run:
     ground.update()
     ground.draw(window)
 
+    bird.update()
+    bird.draw(window)
+
     if len(ground) == 1:
         ground.add(Ground(win_width, 520))
 
     if pipe_timer <= 0:
-        x_top, x_bottom = 700, 700
+        x_top, x_bottom = 550, 550
         y_top = random.randint(-600, -480)
         y_bottom = y_top + random.randint(90, 130) + bottom_pipe_image.get_height()
         pipes.add(Pipe(x_top, y_top, top_pipe_image))
         pipes.add(Pipe(x_bottom, y_bottom, bottom_pipe_image))
-        pipe_timer = random.randint(180, 300)
+        pipe_timer = random.randint(180, 250)
     pipe_timer -= 1
 
     clock.tick(60)
